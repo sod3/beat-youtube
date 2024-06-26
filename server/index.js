@@ -24,7 +24,7 @@ const app = express();
 dotenv.config();
 
 const corsOptions = {
-  origin: "https://www.youconect.com/",
+  origin: ["https://www.youconect.com", "https://beat-youtube.vercel.app"],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   optionsSuccessStatus: 204
