@@ -24,7 +24,7 @@ const app = express();
 dotenv.config();
 
 const corsOptions = {
-  origin: 'https://your-frontend-domain.com',
+  origin: "https://www.youconect.com/",
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   optionsSuccessStatus: 204
