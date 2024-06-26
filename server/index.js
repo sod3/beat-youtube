@@ -11,11 +11,6 @@ import feedbackRoutes from "./routes/feedback.js";
 import shortsvideoRoutes from './routes/videoRoutes.js';
 import cors from 'cors';
 import multer from 'multer';
-
-// imports from threads backend
-import userRoutesThreads from "./backend/routes/userRoutes.js";
-import postRoutes from "./backend/routes/postRoutes.js";
-import messageRoutes from "./backend/routes/messageRoutes.js";
 import { v2 as cloudinary } from "cloudinary";
 import { app as socketApp, server } from "./backend/socket/socket.js";
 import job from "./backend/cron/cron.js";
@@ -23,12 +18,11 @@ import job from "./backend/cron/cron.js";
 const app = express();
 dotenv.config();
 
-// Configure CORS
 const corsOptions = {
-  origin: 'https://beat-youtube-zdgn.vercel.app/', // replace with your frontend domain
+  origin: 'https://your-frontend-domain.com',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true, // allow session cookies from browser to pass through
-  optionsSuccessStatus: 204 // some legacy browsers choke on 204
+  credentials: true,
+  optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
@@ -51,19 +45,30 @@ const connect = () => {
     });
 };
 
-const upload = multer({ dest: 'uploads/' });
+const storage = multer.memoryStorage(); // Use memory storage instead of disk storage
+const upload = multer({ storage });
 
 //middlewares
 app.use(cookieParser());
 app.use(express.json());
-app.use(express.json({ limit: "50mb" })); // To parse JSON data in the req.body
+app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
+
+app.post('/upload', upload.single('file'), (req, res) => {
+  const file = req.file;
+  cloudinary.uploader.upload_stream({ resource_type: 'auto' }, (error, result) => {
+    if (error) {
+      return res.status(500).send(error);
+    }
+    res.status(200).send({ url: result.secure_url });
+  }).end(file.buffer);
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/comments", commentRoutes);
 app.use('/api/profile', profileRoutes);
-app.use('/uploads', express.static('uploads'));
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api', shortsvideoRoutes);
 
