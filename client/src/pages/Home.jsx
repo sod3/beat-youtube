@@ -87,18 +87,16 @@ const Home = ({ setOpen }) => {
           });
         } else {
           console.error('Response data is not an array:', res.data);
-          // Handle non-array response data if needed
+          // Handle non-array response data if needed (e.g., set an error state)
         }
       } catch (error) {
         console.error('Error fetching videos:', error);
-        // Handle error fetching data
+        // Handle error fetching data (e.g., set an error state or show a message)
       }
     };
   
     fetchVideos();
   }, [filter, page]);
-  
-
 
   const handleFilterChange = (tag) => {
     setFilter(tag.toLowerCase());
