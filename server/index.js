@@ -1,27 +1,26 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import cors from "cors";
+import multer from "multer";
+import { v2 as cloudinary } from "cloudinary";
+import cookieParser from "cookie-parser";
+
 import userRoutes from "./routes/users.js";
 import videoRoutes from "./routes/videos.js";
 import commentRoutes from "./routes/comments.js";
 import authRoutes from "./routes/auth.js";
-import cookieParser from "cookie-parser";
 import profileRoutes from './routes/profile.js';
 import feedbackRoutes from "./routes/feedback.js";
-import shortsvideoRoutes from './routes/videoRoutes.js';
-import cors from 'cors';
-import multer from 'multer';
-import { v2 as cloudinary } from "cloudinary";
+import shortsvideoRoutes from './routes/videoRoutes.js";
 import { app as socketApp, server } from "./backend/socket/socket.js";
 import job from "./backend/cron/cron.js";
-
-// imports from threads backend
 import userRoutesThreads from "./backend/routes/userRoutes.js";
 import postRoutes from "./backend/routes/postRoutes.js";
 import messageRoutes from "./backend/routes/messageRoutes.js";
 
-const app = express();
 dotenv.config();
+const app = express();
 
 const corsOptions = {
   origin: ["https://www.youconect.com", "https://beat-youtube.vercel.app"],
@@ -30,7 +29,11 @@ const corsOptions = {
   optionsSuccessStatus: 204
 };
 
-app.use(cors(corsOptions));
+app.use(cors(corsOptions)); // Use CORS middleware globally
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" }));
 job.start();
 
 cloudinary.config({
@@ -50,14 +53,8 @@ const connect = () => {
     });
 };
 
-const storage = multer.memoryStorage(); // Use memory storage instead of disk storage
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
-
-//middlewares
-app.use(cookieParser());
-app.use(express.json());
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ extended: true }));
 
 app.post('/upload', upload.single('file'), (req, res) => {
   const file = req.file;
@@ -85,7 +82,7 @@ app.use("/api/messages", messageRoutes);
 
 // Define a default route handler for the root endpoint
 app.get('/', (req, res) => {
-  res.send('Welcome to My API'); // Example response
+  res.send('Welcome to My API');
 });
 
 // Error handler
