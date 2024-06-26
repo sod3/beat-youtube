@@ -15,6 +15,13 @@ import { v2 as cloudinary } from "cloudinary";
 import { app as socketApp, server } from "./backend/socket/socket.js";
 import job from "./backend/cron/cron.js";
 
+// imports from threads backend
+import userRoutesThreads from "./backend/routes/userRoutes.js";
+import postRoutes from "./backend/routes/postRoutes.js";
+import messageRoutes from "./backend/routes/messageRoutes.js";
+import { v2 as cloudinary } from "cloudinary";
+import { app as socketApp, server } from "./backend/socket/socket.js";
+import job from "./backend/cron/cron.js";
 const app = express();
 dotenv.config();
 
