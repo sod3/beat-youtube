@@ -25,16 +25,16 @@ const IconWrapper = styled.div`
   right: 20px;
   display: flex;
   align-items: center;
-  z-index: 999; /* Ensure the icon stays on top of other content */
+  z-index: 999;
 `;
 
 const Image = styled.img`
-  width: 60px; /* Adjust the size of the image */
+  width: 60px;
   height: 60px;
-  border-radius: 50%; /* Make it circular */
+  border-radius: 50%;
   cursor: pointer;
-  border: 3px solid gold; /* Add golden border */
-  animation: rotateBorder 4s linear infinite; /* Apply rotation animation */
+  border: 3px solid gold;
+  animation: rotateBorder 4s linear infinite;
 `;
 
 const FilterContainer = styled.div`
@@ -74,9 +74,9 @@ const Home = ({ setOpen }) => {
         // Check if res.data is an array before using map
         if (Array.isArray(res.data)) {
           const uniqueVideos = Array.from(new Set(res.data.map((v) => v._id))).map(
-            (id) => res.data.find((v) => v._id === id),
+            (id) => res.data.find((v) => v._id === id)
           );
-  
+
           // Update state with unique videos
           setVideos((prev) => {
             const newVideos = [...prev, ...uniqueVideos];
@@ -94,7 +94,7 @@ const Home = ({ setOpen }) => {
         // Handle error fetching data (e.g., set an error state or show a message)
       }
     };
-  
+
     fetchVideos();
   }, [filter, page]);
 
@@ -125,7 +125,7 @@ const Home = ({ setOpen }) => {
         <meta property="og:description" content="A platform to share and watch high-quality videos." />
         <meta property="og:url" content="https://youconect.com/home" />
         <meta property="og:image" content="https://youconect.com/img/og-image.png" />
-        </Helmet>
+      </Helmet>
       <Container>
         <FilterContainer>
           {tags.map((tag) => (
@@ -141,14 +141,14 @@ const Home = ({ setOpen }) => {
         <VideoGrid>
           {videos.map((video, index) => (
             <Card
-              key={video._id} // Ensure each key is unique
+              key={video._id}
               video={video}
               ref={videos.length === index + 1 ? lastVideoElementRef : null}
             />
           ))}
         </VideoGrid>
       </Container>
-      </HelmetProvider>
+    </HelmetProvider>
   );
 };
 
