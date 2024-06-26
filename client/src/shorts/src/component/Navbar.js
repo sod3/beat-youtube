@@ -20,7 +20,7 @@ function Navbar({ onNewVideo }) {
 
     try {
       const response = await axios.post(
-        "http://localhost:8800/api/upload",
+        "https://beat-youtube.vercel.app/api/upload",
         formData,
         {
           headers: {

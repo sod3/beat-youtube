@@ -85,7 +85,7 @@ function Video({ video }) {
     setSubs((sub) => !sub);
     try {
       const response = await axios.patch(
-        `http://localhost:8800/api/videos/${video._id}`,
+        `https://beat-youtube.vercel.app/api/videos/${video._id}`,
         {
           subscribers: !subs ? video.subscribers + 1 : video.subscribers - 1,
         },
@@ -101,7 +101,7 @@ function Video({ video }) {
     setStats(newStats);
 
     try {
-      await axios.patch(`http://localhost:8800/api/videos/${video._id}`, {
+      await axios.patch(`https://beat-youtube.vercel.app/api/videos/${video._id}`, {
         [type]: newStats[type],
       });
     } catch (error) {
@@ -117,7 +117,7 @@ function Video({ video }) {
         onClick={handleVideoPress}
         loop
         ref={videoRef}
-        src={`http://localhost:8800/${video.url}`}
+        src={`https://beat-youtube.vercel.app/${video.url}`}
       />
       {showPauseIcon && <PlayArrowIcon className="pause-icon" />}
       <div className="shortsContainer">

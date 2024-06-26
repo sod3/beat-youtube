@@ -57,7 +57,7 @@ const Feedback = () => {
     }
     try {
       const response = await axios.post(
-        "http://localhost:8800/api/feedback",
+        "https://beat-youtube.vercel.app/api/feedback",
         formData,
         {
           headers: {

@@ -20,7 +20,7 @@ export const SocketContextProvider = ({ children }) => {
 
     // Only initialize the socket when user?._id is defined
     if (user?._id) {
-      const socket = io("http://localhost:8800/", {
+      const socket = io("https://beat-youtube.vercel.app/", {
         query: {
           userId: user._id,
         },
