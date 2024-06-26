@@ -10,7 +10,7 @@ import userRoutes from "./routes/users.js";
 import videoRoutes from "./routes/videos.js";
 import commentRoutes from "./routes/comments.js";
 import authRoutes from "./routes/auth.js";
-import profileRoutes from './routes/profile.js';
+import profileRoutes from './routes/profile.js";
 import feedbackRoutes from "./routes/feedback.js";
 import shortsvideoRoutes from './routes/videoRoutes.js";
 import { app as socketApp, server } from "./backend/socket/socket.js";
@@ -29,7 +29,7 @@ const corsOptions = {
   optionsSuccessStatus: 204
 };
 
-app.use(cors(corsOptions)); // Use CORS middleware globally
+app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
