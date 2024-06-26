@@ -68,20 +68,36 @@ const Home = ({ setOpen }) => {
 
   useEffect(() => {
     const fetchVideos = async () => {
-      const res = await axios.get(`/videos?tags=${filter}&page=${page}`);
-      const uniqueVideos = Array.from(new Set(res.data.map((v) => v._id))).map(
-        (id) => res.data.find((v) => v._id === id),
-      );
-      setVideos((prev) => {
-        const newVideos = [...prev, ...uniqueVideos];
-        const uniqueNewVideos = Array.from(
-          new Set(newVideos.map((v) => v._id)),
-        ).map((id) => newVideos.find((v) => v._id === id));
-        return uniqueNewVideos;
-      });
+      try {
+        const res = await axios.get(`/videos?tags=${filter}&page=${page}`);
+        
+        // Check if res.data is an array before using map
+        if (Array.isArray(res.data)) {
+          const uniqueVideos = Array.from(new Set(res.data.map((v) => v._id))).map(
+            (id) => res.data.find((v) => v._id === id),
+          );
+  
+          // Update state with unique videos
+          setVideos((prev) => {
+            const newVideos = [...prev, ...uniqueVideos];
+            const uniqueNewVideos = Array.from(
+              new Set(newVideos.map((v) => v._id))
+            ).map((id) => newVideos.find((v) => v._id === id));
+            return uniqueNewVideos;
+          });
+        } else {
+          console.error('Response data is not an array:', res.data);
+          // Handle non-array response data if needed
+        }
+      } catch (error) {
+        console.error('Error fetching videos:', error);
+        // Handle error fetching data
+      }
     };
+  
     fetchVideos();
   }, [filter, page]);
+  
 
 
   const handleFilterChange = (tag) => {
