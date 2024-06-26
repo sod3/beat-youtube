@@ -22,7 +22,16 @@ import job from "./backend/cron/cron.js";
 
 const app = express();
 dotenv.config();
-app.use(cors());
+
+// Configure CORS
+const corsOptions = {
+  origin: 'https://beat-youtube-zdgn.vercel.app/', // replace with your frontend domain
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true, // allow session cookies from browser to pass through
+  optionsSuccessStatus: 204 // some legacy browsers choke on 204
+};
+
+app.use(cors(corsOptions));
 job.start();
 
 cloudinary.config({
@@ -30,6 +39,7 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
 const connect = () => {
   mongoose
     .connect(process.env.MONGO)
@@ -44,7 +54,7 @@ const connect = () => {
 const upload = multer({ dest: 'uploads/' });
 
 //middlewares
-app.use(cookieParser())
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.json({ limit: "50mb" })); // To parse JSON data in the req.body
 app.use(express.urlencoded({ extended: true }));
@@ -61,6 +71,7 @@ app.use('/api', shortsvideoRoutes);
 app.use("/api/users", userRoutesThreads);
 app.use("/api/posts", postRoutes);
 app.use("/api/messages", messageRoutes);
+
 //error handler
 app.use((err, req, res, next) => {
   const status = err.status || 500;
