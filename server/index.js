@@ -19,6 +19,7 @@ import job from "./backend/cron/cron.js";
 import userRoutesThreads from "./backend/routes/userRoutes.js";
 import postRoutes from "./backend/routes/postRoutes.js";
 import messageRoutes from "./backend/routes/messageRoutes.js";
+
 const app = express();
 dotenv.config();
 
@@ -68,6 +69,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
   }).end(file.buffer);
 });
 
+// Routes for API endpoints
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/videos", videoRoutes);
@@ -81,7 +83,12 @@ app.use("/api/users", userRoutesThreads);
 app.use("/api/posts", postRoutes);
 app.use("/api/messages", messageRoutes);
 
-//error handler
+// Define a default route handler for the root endpoint
+app.get('/', (req, res) => {
+  res.send('Welcome to My API'); // Example response
+});
+
+// Error handler
 app.use((err, req, res, next) => {
   const status = err.status || 500;
   const message = err.message || "Something went wrong!";
