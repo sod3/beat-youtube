@@ -31,6 +31,7 @@ const Container = styled.div`
   top: 0;
   background-color: ${({ theme }) => theme.bgLighter};
   height: 56px;
+  z-index: 1000;  /* Ensure the navbar stays on top */
 `;
 
 const Wrapper = styled.div`
@@ -69,6 +70,7 @@ const Right = styled.div`
 `;
 
 const SearchContainer = styled.div`
+  border-radius: 30px;
   width: 50%;
   position: relative;
 `;

@@ -14,6 +14,8 @@ import Help from "./components/menu pages/Help";
 import Feedback from "./components/menu pages/Feedback";
 import History from "./components/menu pages/History";
 import Upload from "./components/Upload";
+import AboutUs from "./components/menu pages/AboutUs";
+import ContactUs from "./components/menu pages/ContactUs";
 import { ThreadsApp } from "./threads/src/main";
 import { ShortsApp } from "./shorts/src/index";
 
@@ -46,6 +48,8 @@ function App() {
                   <Route index element={<Home type="random" />} />
                   <Route path="trends" element={<Home type="trend" />} />
                   <Route path="/help" element={<Help />} />
+                  <Route path="/contactus" element={<ContactUs />} />
+                  <Route path="/aboutus" element={<AboutUs />} />
                   <Route path="/feedback" element={<Feedback />} />
                   <Route path="/history" element={<History />} />
                   <Route path="/upload-video" element={<Upload />} />

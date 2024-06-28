@@ -14,7 +14,7 @@ import FeedbackOutlinedIcon from "@mui/icons-material/FeedbackOutlined";
 import PlaylistPlayOutlinedIcon from "@mui/icons-material/PlaylistPlayOutlined";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchSubscriptions } from "../redux/userSlice"; // Adjust the path as needed
+import { fetchSubscriptions } from "../redux/userSlice";
 
 const Container = styled.nav`
   flex: 1;
@@ -27,7 +27,15 @@ const Container = styled.nav`
   overflow-y: auto;
 
   @media (max-width: 768px) {
+    width: 100vw;
+    height: auto;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
     font-size: 12px;
+    transform: ${({ open }) => (open ? 'translateX(0)' : 'translateX(-100%)')};
+    transition: transform 0.3s ease-in-out;
   }
 `;
 
@@ -45,6 +53,10 @@ const Logo = styled.div`
   gap: 5px;
   font-weight: bold;
   margin-bottom: 25px;
+
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
 `;
 
 const Img = styled.img`
@@ -65,12 +77,17 @@ const Item = styled.div`
   @media (max-width: 768px) {
     gap: 10px;
     justify-content: center;
+    padding: 10px;
   }
 `;
 
 const Hr = styled.hr`
   margin: 15px 0px;
   border: 0.5px solid ${({ theme }) => theme.soft};
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const Login = styled.div`
@@ -89,10 +106,18 @@ const Button = styled.button`
   display: flex;
   align-items: center;
   gap: 5px;
+
+  @media (max-width: 768px) {
+    padding: 5px 10px;
+  }
 `;
 
 const SubscriptionsSection = styled.section`
   margin-top: 20px;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const SubscriptionChannel = styled.div`
@@ -118,14 +143,37 @@ const ShowMoreButton = styled.button`
   align-items: center;
   gap: 5px;
   margin-top: 10px;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const HamburgerIcon = styled.div`
+  display: none;
+  @media (max-width: 768px) {
+    display: block;
+    position: fixed;
+    top: 45px;
+    right: 10px;
+    z-index: 1100;
+    cursor: pointer;
+
+    div {
+      width: 25px;
+      height: 3px;
+      background-color: ${({ theme }) => theme.text};
+      margin: 5px 0;
+      transition: 0.4s;
+    }
+  }
 `;
 
 const Menu = ({ darkMode, setDarkMode }) => {
   const dispatch = useDispatch();
-  const { currentUser, subscriptions = [] } = useSelector(
-    (state) => state.user,
-  );
+  const { currentUser, subscriptions = [] } = useSelector((state) => state.user);
   const [showAllSubscriptions, setShowAllSubscriptions] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     if (currentUser && currentUser.id) {
@@ -133,116 +181,127 @@ const Menu = ({ darkMode, setDarkMode }) => {
     }
   }, [dispatch, currentUser]);
 
+  const handleMenuItemClick = () => {
+    setMenuOpen(false);
+  };
+
   return (
-    <Container>
-      <Wrapper>
-        <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
-          <Logo>
-            <Img src={YouConect} alt="YouConect Logo" loading="lazy" />
-            YouConect
-          </Logo>
-        </Link>
-        <Link to="/" style={{ textDecoration: "none", color: "inherit" }} aria-label="Home">
-          <Item>
-            <HomeIcon />
-            Home
+    <>
+      <HamburgerIcon onClick={() => setMenuOpen(!menuOpen)}>
+        <div />
+        <div />
+        <div />
+      </HamburgerIcon>
+      <Container open={menuOpen}>
+        <Wrapper>
+          <Link to="/" style={{ textDecoration: "none", color: "inherit" }} onClick={handleMenuItemClick}>
+            <Logo>
+              <Img src={YouConect} alt="YouConect Logo" loading="lazy" />
+              YouConect
+            </Logo>
+          </Link>
+          <Link to="/" style={{ textDecoration: "none", color: "inherit" }} aria-label="Home" onClick={handleMenuItemClick}>
+            <Item>
+              <HomeIcon />
+              Home
+            </Item>
+          </Link>
+          <Link to="/trends" style={{ textDecoration: "none", color: "inherit" }} aria-label="Explore" onClick={handleMenuItemClick}>
+            <Item>
+              <ExploreOutlinedIcon />
+              Explore
+            </Item>
+          </Link>
+          <Link to="/subscriptions" style={{ textDecoration: "none", color: "inherit" }} aria-label="Subscriptions" onClick={handleMenuItemClick}>
+            <Item>
+              <SubscriptionsOutlinedIcon />
+              Subscriptions
+            </Item>
+          </Link>
+          <Hr />
+          <Link to="/history" style={{ textDecoration: "none", color: "inherit" }} aria-label="History" onClick={handleMenuItemClick}>
+            <Item>
+              <HistoryOutlinedIcon />
+              History
+            </Item>
+          </Link>
+          <Link to="/threadauth" style={{ textDecoration: "none", color: "inherit" }} aria-label="Threads" onClick={handleMenuItemClick}>
+            <Item>
+              <HistoryOutlinedIcon />
+              Threads
+            </Item>
+          </Link>
+          <Link to="/shorts" style={{ textDecoration: "none", color: "inherit" }} aria-label="Shorts" onClick={handleMenuItemClick}>
+            <Item>
+              <PlaylistPlayOutlinedIcon />
+              Shorts
+            </Item>
+          </Link>
+          <Link to="/feedback" style={{ textDecoration: "none", color: "inherit" }} aria-label="Send Feedback" onClick={handleMenuItemClick}>
+            <Item>
+              <FeedbackOutlinedIcon />
+              Send Feedback
+            </Item>
+          </Link>
+          <Hr />
+          {!currentUser && (
+            <>
+              <Login>
+                Sign in to like videos, comment, and subscribe.
+                <Link to="/signin" style={{ textDecoration: "none" }} onClick={handleMenuItemClick}>
+                  <Button aria-label="Sign in">
+                    <AccountCircleOutlinedIcon />
+                    SIGN IN
+                  </Button>
+                </Link>
+              </Login>
+              <Hr />
+            </>
+          )}
+          {currentUser && (
+            <SubscriptionsSection aria-label="Subscriptions Section">
+              <Item>SUBSCRIPTION</Item>
+              {subscriptions
+                .slice(0, showAllSubscriptions ? subscriptions.length : 5)
+                .map((channel) => (
+                  <SubscriptionChannel key={channel.id}>
+                    <AccountCircleOutlinedIcon aria-label={channel.name} />
+                    {channel.name}
+                  </SubscriptionChannel>
+                ))}
+              <ShowMoreButton
+                onClick={() => setShowAllSubscriptions(!showAllSubscriptions)}
+              >
+                {showAllSubscriptions ? "Show Less" : "Show More"}
+              </ShowMoreButton>
+            </SubscriptionsSection>
+          )}
+          <Hr />
+          <Link to="/aboutus" style={{ textDecoration: "none", color: "inherit" }} aria-label="Settings" onClick={handleMenuItemClick}>
+            <Item>
+              <SettingsOutlinedIcon />
+              AboutUs
+            </Item>
+          </Link>
+          <Link to="/contactus" style={{ textDecoration: "none", color: "inherit" }} aria-label="Report" onClick={handleMenuItemClick}>
+            <Item>
+              <FlagOutlinedIcon />
+              ContactUs
+            </Item>
+          </Link>
+          <Link to="/help" style={{ textDecoration: "none", color: "inherit" }} aria-label="Help" onClick={handleMenuItemClick}>
+            <Item>
+              <HelpOutlineOutlinedIcon />
+              Help
+            </Item>
+          </Link>
+          <Item onClick={() => { setDarkMode(!darkMode); handleMenuItemClick(); }} aria-label="Toggle Dark Mode">
+            <SettingsBrightnessOutlinedIcon />
+            {darkMode ? "Light" : "Dark"} Mode
           </Item>
-        </Link>
-        <Link to="/trends" style={{ textDecoration: "none", color: "inherit" }} aria-label="Explore">
-          <Item>
-            <ExploreOutlinedIcon />
-            Explore
-          </Item>
-        </Link>
-        <Link to="/subscriptions" style={{ textDecoration: "none", color: "inherit" }} aria-label="Subscriptions">
-          <Item>
-            <SubscriptionsOutlinedIcon />
-            Subscriptions
-          </Item>
-        </Link>
-        <Hr />
-        <Link to="/history" style={{ textDecoration: "none", color: "inherit" }} aria-label="History">
-          <Item>
-            <HistoryOutlinedIcon />
-            History
-          </Item>
-        </Link>
-        <Link to="/threadauth" style={{ textDecoration: "none", color: "inherit" }} aria-label="Threads">
-          <Item>
-            <HistoryOutlinedIcon />
-            Threads
-          </Item>
-        </Link>
-        <Link to="/shorts" style={{ textDecoration: "none", color: "inherit" }} aria-label="Shorts">
-          <Item>
-            <PlaylistPlayOutlinedIcon />
-            Shorts
-          </Item>
-        </Link>
-        <Link to="/feedback" style={{ textDecoration: "none", color: "inherit" }} aria-label="Send Feedback">
-          <Item>
-            <FeedbackOutlinedIcon />
-            Send Feedback
-          </Item>
-        </Link>
-        <Hr />
-        {!currentUser && (
-          <>
-            <Login>
-              Sign in to like videos, comment, and subscribe.
-              <Link to="/signin" style={{ textDecoration: "none" }}>
-                <Button aria-label="Sign in">
-                  <AccountCircleOutlinedIcon />
-                  SIGN IN
-                </Button>
-              </Link>
-            </Login>
-            <Hr />
-          </>
-        )}
-        {currentUser && (
-          <SubscriptionsSection aria-label="Subscriptions Section">
-            <Item>SUBSCRIPTION</Item>
-            {subscriptions
-              .slice(0, showAllSubscriptions ? subscriptions.length : 5)
-              .map((channel) => (
-                <SubscriptionChannel key={channel.id}>
-                  <AccountCircleOutlinedIcon aria-label={channel.name} />
-                  {channel.name}
-                </SubscriptionChannel>
-              ))}
-            <ShowMoreButton
-              onClick={() => setShowAllSubscriptions(!showAllSubscriptions)}
-            >
-              {showAllSubscriptions ? "Show Less" : "Show More"}
-            </ShowMoreButton>
-          </SubscriptionsSection>
-        )}
-        <Hr />
-        <Link to="/settings" style={{ textDecoration: "none", color: "inherit" }} aria-label="Settings">
-          <Item>
-            <SettingsOutlinedIcon />
-            Settings
-          </Item>
-        </Link>
-        <Link to="/report" style={{ textDecoration: "none", color: "inherit" }} aria-label="Report">
-          <Item>
-            <FlagOutlinedIcon />
-            Report
-          </Item>
-        </Link>
-        <Link to="/help" style={{ textDecoration: "none", color: "inherit" }} aria-label="Help">
-          <Item>
-            <HelpOutlineOutlinedIcon />
-            Help
-          </Item>
-        </Link>
-        <Item onClick={() => setDarkMode(!darkMode)} aria-label="Toggle Dark Mode">
-          <SettingsBrightnessOutlinedIcon />
-          {darkMode ? "Light" : "Dark"} Mode
-        </Item>
-      </Wrapper>
-    </Container>
+        </Wrapper>
+      </Container>
+    </>
   );
 };
 

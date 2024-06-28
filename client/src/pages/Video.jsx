@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
 import ThumbDownOffAltOutlinedIcon from "@mui/icons-material/ThumbDownOffAltOutlined";
@@ -7,7 +7,6 @@ import AddTaskOutlinedIcon from "@mui/icons-material/AddTaskOutlined";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import Comments from "../components/Comments";
-import Card from "../components/Card";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
@@ -16,6 +15,13 @@ import { subscription } from "../redux/userSlice";
 import { format } from "timeago.js";
 import Recommendation from "../components/Recommendation";
 import { Helmet } from "react-helmet";
+import SharePopup from "../components/SharePopup";
+import TheaterModeIcon from "@mui/icons-material/Theaters";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
+import HighQualityIcon from "@mui/icons-material/HighQuality";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import SpeedIcon from "@mui/icons-material/Speed";
+import { HotKeys } from "react-hotkeys";
 
 const Container = styled.div`
   display: flex;
@@ -26,7 +32,20 @@ const Content = styled.div`
   flex: 5;
 `;
 
-const VideoWrapper = styled.div``;
+const VideoWrapper = styled.div`
+  position: relative;
+  ${({ theaterMode }) =>
+    theaterMode &&
+    `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    background: black;
+  `}
+`;
 
 const Title = styled.h1`
   font-size: 18px;
@@ -60,9 +79,26 @@ const Button = styled.div`
   cursor: pointer;
   margin: 0 5px;
   border-radius: 30px;
+  position: relative;
   &:hover {
     background-color: #cc1a00;
     color: white;
+  }
+  &::after {
+    content: "${({ hotkey }) => hotkey}";
+    position: absolute;
+    top: -20px;
+    right: 50%;
+    transform: translateX(50%);
+    background-color: #000;
+    color: #fff;
+    padding: 2px 5px;
+    border-radius: 5px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  &:hover::after {
+    opacity: 1;
   }
 `;
 
@@ -133,7 +169,7 @@ const Subscribe = styled.button`
 `;
 
 const VideoFrame = styled.video`
-  max-height: 720px;
+  max-height: ${({ theaterMode }) => (theaterMode ? "calc(100vh - 100px)" : "720px")};
   width: 100%;
   object-fit: cover;
 `;
@@ -142,12 +178,17 @@ const Video = () => {
   const { currentUser } = useSelector((state) => state.user);
   const { currentVideo } = useSelector((state) => state.video);
   const dispatch = useDispatch();
+  const videoRef = useRef(null);
 
   const path = useLocation().pathname.split("/")[2];
   console.log("Video ID:", path); // Log the video ID
 
   const [channel, setChannel] = useState({});
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
+  const [sharePopupOpen, setSharePopupOpen] = useState(false); // State to control the popup
+  const [theaterMode, setTheaterMode] = useState(false);
+  const [autoplay, setAutoplay] = useState(true);
+  const [playbackRate, setPlaybackRate] = useState(1.0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -167,7 +208,18 @@ const Video = () => {
         console.error(err);
       }
     };
+
+    // Increase view count on component mount
+    const addView = async () => {
+      try {
+        await axios.put(`/videos/view/${path}`);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
     fetchData();
+    addView();
   }, [path, dispatch]);
 
   const handleLike = async () => {
@@ -208,88 +260,145 @@ const Video = () => {
     setDescriptionExpanded(!descriptionExpanded);
   };
 
+  const handleTheaterModeToggle = () => {
+    setTheaterMode(!theaterMode);
+  };
+
+  const handleAutoplayToggle = () => {
+    setAutoplay(!autoplay);
+  };
+
+  const handleHotkey = (hotkey) => {
+    switch (hotkey) {
+      case 'like':
+        handleLike();
+        break;
+      case 'dislike':
+        handleDislike();
+        break;
+      case 'share':
+        setSharePopupOpen((prev) => !prev);
+        break;
+      case 'save':
+        // Add your save functionality here
+        break;
+      case 'theaterMode':
+        handleTheaterModeToggle();
+        break;
+      case 'autoplay':
+        handleAutoplayToggle();
+        break;
+      default:
+        break;
+    }
+  };
+
+  const keyMap = {
+    LIKE: "l",
+    DISLIKE: "d",
+    SHARE: "s",
+    SAVE: "v",
+    THEATER_MODE: "t",
+    AUTOPLAY: "a",
+  };
+
+  const handlers = {
+    LIKE: () => handleHotkey('like'),
+    DISLIKE: () => handleHotkey('dislike'),
+    SHARE: () => handleHotkey('share'),
+    SAVE: () => handleHotkey('save'),
+    THEATER_MODE: () => handleHotkey('theaterMode'),
+    AUTOPLAY: () => handleHotkey('autoplay'),
+  };
+
   return (
-    <Container>
-      <Helmet>
-        <title>{currentVideo?.title || "Video"}</title>
-        <meta name="description" content={currentVideo?.desc || "Watch this amazing video"} />
-        <meta name="keywords" content={currentVideo?.tags?.join(", ") || "video, sharing, YouConect ,platform"} />
-        <link rel="canonical" href={`https://youconect.com/videos/${path}`} />
-        <meta property="og:title" content={currentVideo?.title || "Video"} />
-        <meta property="og:description" content={currentVideo?.desc || "Watch this amazing video"} />
-        <meta property="og:url" content={`https://youconect.com/videos/${path}`} />
-        <meta property="og:image" content={currentVideo?.thumbnailUrl || "https://youconect.com/default-thumbnail.png"} />
-        <meta property="og:type" content="video.other" />
-      </Helmet>
-      <Content>
-        <VideoWrapper>
-          <VideoFrame src={currentVideo?.videoUrl} controls />
-        </VideoWrapper>
-        <Title>{currentVideo?.title}</Title>
-        <Details>
-          <Info>
-            {currentVideo?.views} views • {format(currentVideo?.createdAt)}
-          </Info>
-          <Buttons>
-            <Button
-              onClick={handleLike}
-              active={currentVideo?.likes?.includes(currentUser?._id)}
-            >
-              {currentVideo?.likes?.includes(currentUser?._id) ? (
-                <ThumbUpIcon />
-              ) : (
-                <ThumbUpOutlinedIcon />
-              )}{" "}
-              {currentVideo?.likes?.length}
-            </Button>
-            <Button
-              onClick={handleDislike}
-              active={currentVideo?.dislikes?.includes(currentUser?._id)}
-            >
-              {currentVideo?.dislikes?.includes(currentUser?._id) ? (
-                <ThumbDownIcon />
-              ) : (
-                <ThumbDownOffAltOutlinedIcon />
-              )}
-            </Button>
-            <Button>
-              <ReplyOutlinedIcon /> Share
-            </Button>
-            <Button>
-              <AddTaskOutlinedIcon /> Save
-            </Button>
-          </Buttons>
-        </Details>
-        <Hr />
-        <Channel>
-          <ChannelInfo>
-            <Image src={channel.img} loading="lazy" alt={`${channel.name}'s channel logo`} />
-            <ChannelDetail>
-              <ChannelName>{channel.name}</ChannelName>
-              <ChannelCounter>{channel.subscribers} subscribers</ChannelCounter>
-              <Description>
-                {descriptionExpanded
-                  ? currentVideo?.desc
-                  : currentVideo?.desc?.substring(0, 100)}
-              </Description>
-              {currentVideo?.desc?.length > 100 && (
-                <DescriptionExpand onClick={handleDescriptionToggle}>
-                  {descriptionExpanded ? "Show Less" : "Show More"}
-                </DescriptionExpand>
-              )}
-            </ChannelDetail>
-          </ChannelInfo>
-          <Subscribe onClick={handleSub}>
-            {currentUser?.subscribedUsers?.includes(channel._id)
-              ? "SUBSCRIBED"
-              : "SUBSCRIBE"}
-          </Subscribe>
-        </Channel>
-        <Hr />
-        <Comments videoId={currentVideo?._id} />
-      </Content>
-      <Recommendation tags={currentVideo?.tags} />
-    </Container>
+    <HotKeys keyMap={keyMap} handlers={handlers}>
+      <Container>
+        <Helmet>
+          <title>{currentVideo?.title}</title>
+        </Helmet>
+        <Content>
+          <VideoWrapper theaterMode={theaterMode}>
+            <VideoFrame
+              ref={videoRef}
+              src={currentVideo?.videoUrl}
+              controls
+              autoPlay={autoplay}
+              playbackRate={playbackRate}
+              theaterMode={theaterMode}
+            />
+          </VideoWrapper>
+          <Title>{currentVideo?.title}</Title>
+          <Details>
+            <Info>
+              {currentVideo?.views} views • {format(currentVideo?.createdAt)}
+            </Info>
+            <Buttons>
+              <Button
+                onClick={handleLike}
+                active={currentVideo?.likes?.includes(currentUser?._id)}
+                hotkey="L"
+              >
+                {currentVideo?.likes?.includes(currentUser?._id) ? (
+                  <ThumbUpIcon />
+                ) : (
+                  <ThumbUpOutlinedIcon />
+                )}{" "}
+                {currentVideo?.likes?.length}
+              </Button>
+              <Button
+                onClick={handleDislike}
+                active={currentVideo?.dislikes?.includes(currentUser?._id)}
+                hotkey="D"
+              >
+                {currentVideo?.dislikes?.includes(currentUser?._id) ? (
+                  <ThumbDownIcon />
+                ) : (
+                  <ThumbDownOffAltOutlinedIcon />
+                )}{" "}
+                Dislike
+              </Button>
+              <Button
+                onClick={() => setSharePopupOpen((prev) => !prev)}
+                hotkey="S"
+              >
+                <ReplyOutlinedIcon /> Share
+              </Button>
+              <Button hotkey="V">
+                <AddTaskOutlinedIcon /> Save
+              </Button>
+            </Buttons>
+          </Details>
+          <Hr />
+          <Channel>
+            <ChannelInfo>
+              <Image src={channel.img} />
+              <ChannelDetail>
+                <ChannelName>{channel.name}</ChannelName>
+                <ChannelCounter>{channel.subscribers} subscribers</ChannelCounter>
+                <Description>
+                  {descriptionExpanded ? currentVideo?.desc : currentVideo?.desc?.slice(0, 100)}
+                  {currentVideo?.desc?.length > 100 && (
+                    <DescriptionExpand onClick={handleDescriptionToggle}>
+                      {descriptionExpanded ? "Show less" : "Show more"}
+                    </DescriptionExpand>
+                  )}
+                </Description>
+              </ChannelDetail>
+            </ChannelInfo>
+            <Subscribe onClick={handleSub}>
+              {currentUser?.subscribedUsers?.includes(channel._id)
+                ? "SUBSCRIBED"
+                : "SUBSCRIBE"}
+            </Subscribe>
+          </Channel>
+          <Hr />
+          <Comments videoId={currentVideo?._id} />
+        </Content>
+        <Recommendation tags={currentVideo?.tags} />
+        {sharePopupOpen && <SharePopup />}
+      </Container>
+    </HotKeys>
   );
 };
 

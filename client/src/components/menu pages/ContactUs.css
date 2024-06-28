@@ -1,0 +1,108 @@
+/* ContactUs.css */
+.contact-us {
+  padding: 50px 20px;
+  background-color: #f9f9f9;
+  text-align: center;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.contact-us .container {
+  max-width: 600px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.contact-us h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+  color: #333;
+  animation: slideInDown 0.5s ease-in-out;
+}
+
+.contact-us p {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.contact-us .contact-form {
+  text-align: left;
+}
+
+.contact-us .form-group {
+  margin-bottom: 20px;
+}
+
+.contact-us label {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.contact-us input,
+.contact-us textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.contact-us input:focus,
+.contact-us textarea:focus {
+  border-color: #007bff;
+}
+
+.contact-us textarea {
+  height: 100px;
+  resize: vertical;
+}
+
+.contact-us .submit-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-transform: uppercase;
+}
+
+.contact-us .submit-btn:hover {
+  background-color: #0056b3;
+}
+
+.contact-us .response-message {
+  margin-top: 20px;
+  font-size: 16px;
+  color: #333;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-20px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

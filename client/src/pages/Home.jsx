@@ -25,16 +25,16 @@ const IconWrapper = styled.div`
   right: 20px;
   display: flex;
   align-items: center;
-  z-index: 999;
+  z-index: 999; /* Ensure the icon stays on top of other content */
 `;
 
 const Image = styled.img`
-  width: 60px;
+  width: 60px; /* Adjust the size of the image */
   height: 60px;
-  border-radius: 50%;
+  border-radius: 50%; /* Make it circular */
   cursor: pointer;
-  border: 3px solid gold;
-  animation: rotateBorder 4s linear infinite;
+  border: 3px solid gold; /* Add golden border */
+  animation: rotateBorder 4s linear infinite; /* Apply rotation animation */
 `;
 
 const FilterContainer = styled.div`
@@ -68,31 +68,21 @@ const Home = ({ setOpen }) => {
 
   useEffect(() => {
     const fetchVideos = async () => {
-      try {
-        const res = await axios.get(`https://beat-youtube.vercel.app/api/videos?tags=${filter}&page=${page}`);
-        
-        if (Array.isArray(res.data)) {
-          const uniqueVideos = Array.from(new Set(res.data.map((v) => v._id))).map(
-            (id) => res.data.find((v) => v._id === id)
-          );
-
-          setVideos((prev) => {
-            const newVideos = [...prev, ...uniqueVideos];
-            const uniqueNewVideos = Array.from(
-              new Set(newVideos.map((v) => v._id))
-            ).map((id) => newVideos.find((v) => v._id === id));
-            return uniqueNewVideos;
-          });
-        } else {
-          console.error('Response data is not an array:', res.data);
-        }
-      } catch (error) {
-        console.error('Error fetching videos:', error);
-      }
+      const res = await axios.get(`/videos?tags=${filter}&page=${page}`);
+      const uniqueVideos = Array.from(new Set(res.data.map((v) => v._id))).map(
+        (id) => res.data.find((v) => v._id === id),
+      );
+      setVideos((prev) => {
+        const newVideos = [...prev, ...uniqueVideos];
+        const uniqueNewVideos = Array.from(
+          new Set(newVideos.map((v) => v._id)),
+        ).map((id) => newVideos.find((v) => v._id === id));
+        return uniqueNewVideos;
+      });
     };
-
     fetchVideos();
   }, [filter, page]);
+
 
   const handleFilterChange = (tag) => {
     setFilter(tag.toLowerCase());
@@ -121,7 +111,7 @@ const Home = ({ setOpen }) => {
         <meta property="og:description" content="A platform to share and watch high-quality videos." />
         <meta property="og:url" content="https://youconect.com/home" />
         <meta property="og:image" content="https://youconect.com/img/og-image.png" />
-      </Helmet>
+        </Helmet>
       <Container>
         <FilterContainer>
           {tags.map((tag) => (
@@ -137,14 +127,14 @@ const Home = ({ setOpen }) => {
         <VideoGrid>
           {videos.map((video, index) => (
             <Card
-              key={video._id}
+              key={video._id} // Ensure each key is unique
               video={video}
               ref={videos.length === index + 1 ? lastVideoElementRef : null}
             />
           ))}
         </VideoGrid>
       </Container>
-    </HelmetProvider>
+      </HelmetProvider>
   );
 };
 

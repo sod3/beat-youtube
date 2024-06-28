@@ -5,8 +5,17 @@ import Card from "./Card";
 
 const Container = styled.div`
   flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 `;
 
+const Title = styled.h2`
+  font-size: 18px;
+  font-weight: bold;
+  color: ${({ theme }) => theme.text};
+  margin-bottom: 10px;
+`;
 const Recommendation = ({ tags }) => {
   const [videos, setVideos] = useState([]);
 
@@ -20,6 +29,7 @@ const Recommendation = ({ tags }) => {
 
   return (
     <Container>
+      <Title>Recommended Videos</Title>
       {videos.map((video) => (
         <Card type="sm" key={video._id} video={video} />
       ))}

@@ -11,7 +11,7 @@ function App() {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const response = await axios.get("https://beat-youtube.vercel.app/api/videos");
+        const response = await axios.get("${process.env.REACT_APP_API_URL}/api/videos");
         setVideos(response.data);
       } catch (error) {
         console.error("Error fetching videos:", error);

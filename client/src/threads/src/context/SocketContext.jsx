@@ -20,7 +20,7 @@ export const SocketContextProvider = ({ children }) => {
 
     // Only initialize the socket when user?._id is defined
     if (user?._id) {
-      const socket = io("https://beat-youtube.vercel.app/", {
+      const socket = io("${process.env.REACT_APP_API_URL}/", {
         query: {
           userId: user._id,
         },

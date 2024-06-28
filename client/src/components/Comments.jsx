@@ -46,7 +46,6 @@ const SortSelect = styled.select`
   color: ${({ theme }) => theme.text};
   padding: 5px;
   border-radius: 3px;
-  margin-bottom: 20px;
   cursor: pointer;
 `;
 
@@ -94,6 +93,22 @@ const Comments = ({ videoId }) => {
     setSortOrder(e.target.value);
   };
 
+  const handleCommentUpdate = (updatedComment) => {
+    setComments((prev) => {
+      const index = prev.findIndex((comment) => comment._id === updatedComment._id);
+      if (index !== -1) {
+        const updatedComments = [...prev];
+        updatedComments[index] = updatedComment;
+        return updatedComments;
+      }
+      return prev;
+    });
+  };
+
+  const handleCommentDelete = (commentId) => {
+    setComments((prev) => prev.filter((comment) => comment._id !== commentId));
+  };
+
   return (
     <Container>
       {currentUser && (
@@ -117,7 +132,12 @@ const Comments = ({ videoId }) => {
         </SortSelect>
       </SortContainer>
       {comments.map((comment) => (
-        <Comment key={comment._id} comment={comment} />
+        <Comment
+          key={comment._id}  // Ensure unique key
+          comment={comment}
+          onCommentUpdate={updatedComment => setComments(comments.map(c => c._id === updatedComment._id ? updatedComment : c))}
+          onCommentDelete={deletedCommentId => setComments(comments.filter(c => c._id !== deletedCommentId))}
+        />
       ))}
     </Container>
   );

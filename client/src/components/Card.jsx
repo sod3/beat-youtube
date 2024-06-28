@@ -31,8 +31,8 @@ const Image = styled.img`
 
 const VideoPreview = styled.video`
   display: none;
-  width: 100%;
-  height: 202px;
+  width: ${(props) => (props.type === "sm" ? "auto" : "100%")};
+  height: ${(props) => (props.type === "sm" ? "120px" : "202px")};
   object-fit: cover;
   position: absolute;
   top: 0;
@@ -190,7 +190,7 @@ const Card = forwardRef(({ type, video }, ref) => {
     console.log(`Reported for: ${reason}`);
     setReportModalOpen(false);
   };
-  
+
   const handleClick = async () => {
     try {
       // Call action creator to add video to history
@@ -213,7 +213,7 @@ const Card = forwardRef(({ type, video }, ref) => {
         onMouseLeave={handleMouseLeave}
       >
         <Image type={type} src={video.imgUrl} loading="lazy" alt={video.title} />
-        <VideoPreview ref={videoRef} src={video.videoUrl} muted />
+        <VideoPreview ref={videoRef} src={video.videoUrl} muted type={type} />
         <Details type={type}>
           <ChannelImage type={type} src={channel.img} alt={channel.name} />
           <Texts>

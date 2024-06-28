@@ -1,13 +1,13 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
 import ThumbDownOffAltOutlinedIcon from "@mui/icons-material/ThumbDown";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ReplyOutlinedIcon from "@mui/icons-material/ReplyOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { useSelector } from "react-redux";
 
 const Container = styled.div`
   display: flex;
@@ -50,7 +50,6 @@ const Date = styled.span`
 
 const Text = styled.span`
   font-size: 14px;
-  margin: 4px 0;
 `;
 
 const Actions = styled.div`
@@ -110,7 +109,7 @@ const MenuItem = styled.div`
   }
 `;
 
-const Comment = ({ comment }) => {
+const Comment = ({ comment, onCommentUpdate, onCommentDelete }) => {
   const { currentUser } = useSelector((state) => state.user);
   const [channel, setChannel] = useState({});
   const [reply, setReply] = useState("");
@@ -123,22 +122,24 @@ const Comment = ({ comment }) => {
   );
   const [isLikeDisabled, setIsLikeDisabled] = useState(false);
   const [isDislikeDisabled, setIsDislikeDisabled] = useState(false);
+  const [editText, setEditText] = useState(comment.desc);
+  const [isEditing, setIsEditing] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
-    if (comment.userId) {
-      const fetchComment = async () => {
-        try {
+    const fetchChannel = async () => {
+      try {
+        if (comment.userId) {
           const res = await axios.get(`/users/find/${comment.userId}`);
           setChannel(res.data);
-        } catch (err) {
-          console.error(err);
+        } else {
+          console.error("User ID is undefined");
         }
-      };
-      fetchComment();
-    } else {
-      console.error("User ID is undefined");
-    }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchChannel();
   }, [comment.userId]);
 
   const handleLike = async () => {
@@ -192,8 +193,10 @@ const Comment = ({ comment }) => {
         commentId: comment._id,
         userId: currentUser._id,
       });
-      setReplies([res.data, ...replies]);
+      const newReplies = [res.data, ...replies];
+      setReplies(newReplies);
       setReply("");
+      onCommentUpdate({ ...comment, replies: newReplies });
     } catch (err) {
       console.error(err);
     }
@@ -202,18 +205,19 @@ const Comment = ({ comment }) => {
   const handleDelete = async () => {
     try {
       await axios.delete(`/comments/${comment._id}`);
-      // Handle comment deletion in your component's state
+      onCommentDelete(comment._id);
     } catch (err) {
       console.error(err);
     }
   };
 
-  const handleEdit = async (newDesc) => {
+  const handleEdit = async () => {
     try {
-      const res = await axios.put(`/comments/${comment._id}`, {
-        desc: newDesc,
+      await axios.put(`/comments/${comment._id}`, {
+        desc: editText,
       });
-      // Handle comment update in your component's state
+      setIsEditing(false);
+      onCommentUpdate({ ...comment, desc: editText });
     } catch (err) {
       console.error(err);
     }
@@ -227,7 +231,15 @@ const Comment = ({ comment }) => {
           <Name>
             {channel.name} <Date>1 day ago</Date>
           </Name>
-          <Text>{comment.desc}</Text>
+          {isEditing ? (
+            <Input
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && handleEdit()}
+            />
+          ) : (
+            <Text>{comment.desc}</Text>
+          )}
           <Actions>
             <ActionButton onClick={handleLike} disabled={isLikeDisabled}>
               {liked ? <ThumbUpIcon /> : <ThumbUpOutlinedIcon />} {likes}
@@ -236,20 +248,22 @@ const Comment = ({ comment }) => {
               {disliked ? <ThumbDownIcon /> : <ThumbDownOffAltOutlinedIcon />}{" "}
               {dislikes}
             </ActionButton>
-            <ActionButton>
-              <ReplyOutlinedIcon /> Reply
-            </ActionButton>
+            {currentUser && (
+              <ActionButton onClick={() => setIsEditing((prev) => !prev)}>
+                <ReplyOutlinedIcon />
+              </ActionButton>
+            )}
           </Actions>
-          <MoreOptions onClick={() => setShowDropdown((prev) => !prev)}>
-            <MoreVertIcon />
-            <DropdownMenu show={showDropdown}>
-              <MenuItem onClick={handleDelete}>Delete</MenuItem>
-              <MenuItem onClick={() => handleEdit("New Comment Text")}>
-                Edit
-              </MenuItem>
-            </DropdownMenu>
-          </MoreOptions>
         </Details>
+        <MoreOptions onClick={() => setShowDropdown((prev) => !prev)}>
+          <MoreVertIcon />
+          <DropdownMenu show={showDropdown}>
+            <MenuItem onClick={() => setIsEditing((prev) => !prev)}>
+              Edit
+            </MenuItem>
+            <MenuItem onClick={handleDelete}>Delete</MenuItem>
+          </DropdownMenu>
+        </MoreOptions>
       </CommentWrapper>
       <ReplyContainer>
         <Input
@@ -259,7 +273,18 @@ const Comment = ({ comment }) => {
           onKeyPress={(e) => e.key === "Enter" && handleReplySubmit()}
         />
         {replies.map((reply) => (
-          <Comment key={reply._id} comment={reply} />
+          <Comment
+            key={reply._id} // Ensure unique key for replies
+            comment={reply}
+            onCommentUpdate={(updatedReply) =>
+              setReplies(replies.map((r) =>
+                r._id === updatedReply._id ? updatedReply : r
+              ))
+            }
+            onCommentDelete={(deletedReplyId) =>
+              setReplies(replies.filter((r) => r._id !== deletedReplyId))
+            }
+          />
         ))}
       </ReplyContainer>
     </Container>

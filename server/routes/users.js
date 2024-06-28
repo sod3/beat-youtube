@@ -33,4 +33,15 @@ router.put("/like/:videoId", verifyToken, like);
 //dislike a video
 router.put("/dislike/:videoId", verifyToken, dislike);
 
+router.get('/subscriptions/:userId', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+    const subscribedChannels = await Promise.all(
+      user.subscribedUsers.map(channelId => User.findById(channelId))
+    );
+    res.status(200).json(subscribedChannels);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 export default router;
